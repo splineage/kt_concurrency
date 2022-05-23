@@ -1,7 +1,7 @@
 import kotlinx.coroutines.*
 
 @OptIn(DelicateCoroutinesApi::class)
-fun main() = runBlocking {
+fun main_deferred() = runBlocking {
     val deferred = GlobalScope.async {
         TODO("Not implemented yet!")
     }

@@ -6,7 +6,7 @@ var counter = 0
 /**
  * 예상 결과 2100이 나오지 않음.
  * atomic operations 위반반 */
-fun main() = runBlocking{
+fun atomic_example() = runBlocking{
 //    val workerA = asyncIncrement(2000)
 //    val workerB = asyncIncrement(100)
 //    workerA.await()

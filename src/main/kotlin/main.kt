@@ -4,16 +4,20 @@ import kotlin.system.measureTimeMillis
 data class UserInfo(val name: String, val lastName: String, val id: Int)
 lateinit var user: UserInfo
 
-fun main() = runBlocking{
-    asyncGetUserInfo(1)
-    delay(1000)
-    println("${Thread.activeCount()} threads active at the start")
+fun main(): Unit = runBlocking{
+//    asyncGetUserInfo(1)
+//    delay(1000)
+//    println("${Thread.activeCount()} threads active at the start")
 //    val time = measureTimeMillis {
 //        createCoroutines(3)
 //    }
 //    println("${Thread.activeCount()} threads active at the end")
 //    println("Took $time ms")
-    println("User ${user.id} is ${user.name}")
+//    println("User ${user.id} is ${user.name}")
+
+//    context_example_async()
+
+    iterator_example()
 }
 
 suspend fun createCoroutines(amount: Int){

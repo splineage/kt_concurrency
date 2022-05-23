@@ -12,7 +12,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 val netDispatcher = newSingleThreadContext(name = "ServiceCall") // singleThread
 val factory = DocumentBuilderFactory.newInstance()
 
-fun main()= runBlocking {
+fun dispatchers()= runBlocking {
     val task = launch(netDispatcher){
 //        doSomething()
 //        printcurrentThread()

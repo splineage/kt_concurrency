@@ -1,7 +1,7 @@
 import kotlinx.coroutines.*
 
 @OptIn(InternalCoroutinesApi::class, DelicateCoroutinesApi::class)
-fun main() = runBlocking{
+fun c3() = runBlocking{
     /**
      * handler
      */
