@@ -1,4 +1,5 @@
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlin.system.measureTimeMillis
 
 data class UserInfo(val name: String, val lastName: String, val id: Int)
@@ -17,7 +18,52 @@ fun main(): Unit = runBlocking{
 
 //    context_example_async()
 
-    iterator_example()
+//    iterator_example()
+
+    /**
+     * channel
+     */
+    var time = measureTimeMillis {
+        val channel = Channel<Int>()
+        val sender = GlobalScope.launch {
+            repeat(10){
+                channel.send(it)
+                println("Send $it")
+            }
+        }
+        channel.receive()
+        channel.receive()
+
+    }
+    println("channel Took $time")
+
+    time = measureTimeMillis {
+        val unBufferedChannel = Channel<Int>(Channel.UNLIMITED) // 송신자 중지 안함.
+        val sender = GlobalScope.launch {
+            repeat(5){
+                println("Sending $it")
+                unBufferedChannel.send(it)
+            }
+        }
+        delay(500)
+    }
+    println("unbufferedchannel took $time")
+
+    time = measureTimeMillis {
+        val channel = Channel<Int>(4) // 버퍼 크기에 의해 중단됨.
+        val sender = GlobalScope.launch {
+            repeat(10){
+                channel.send(it)
+                println("Send $it")
+            }
+        }
+        delay(500)
+        println("Taking two")
+        channel.receive()
+        delay(500)
+    }
+    println("unbufferedchannel took $time")
+
 }
 
 suspend fun createCoroutines(amount: Int){
