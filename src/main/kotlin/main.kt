@@ -1,6 +1,10 @@
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlin.system.measureTimeMillis
+import kotlinx.coroutines.channels.actor
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import model.Action
 
 data class UserInfo(val name: String, val lastName: String, val id: Int)
 lateinit var user: UserInfo
@@ -64,7 +68,89 @@ fun main(): Unit = runBlocking{
     }
     println("unbufferedchannel took $time")
 
+    time = measureTimeMillis {
+        val workerA = asyncActorIncrement(2000)
+        val workerB = asyncActorDecrement(100)
+        workerA.await()
+        workerB.await()
+        println("actorCount $actorCount")
+
+    }
+    println("actor took $time")
+
+    time = measureTimeMillis {
+        val bufferedActor = actor<String>(capacity = 10) {
+            for (msg in channel){
+                println(msg)
+            }
+        }
+
+        for (i in 1..30){
+            bufferedActor.send(i.toString())
+        }
+        bufferedActor.close()
+    }
+    println("buffered actor took $time")
+
+    time = measureTimeMillis {
+        val dis = newFixedThreadPoolContext(3, "pool")
+        val poolActor = actor<String>(dis) {
+            for (msg in channel){
+                println("Running in ${Thread.currentThread().name}")
+            }
+        }
+
+        for (i in 1..30){
+            poolActor.send(i.toString())
+        }
+        poolActor.close()
+    }
+    println(" actor took $time")
+
+    time = measureTimeMillis {
+        val workerA = mutexIncrement(2000)
+        val workerB = mutexIncrement(500)
+        workerA.await()
+        workerB.await()
+        println("mutexCount $mutexCounter")
+    }
+    println(" mutex took $time")
 }
+
+var mutex = Mutex()
+var mutexCounter = 0
+
+val actorContext = newSingleThreadContext("counterActor")
+var actorCount = 0
+var actorCounter = CoroutineScope(actorContext).actor<Action>{
+    for (msg in channel){
+        when(msg){
+            Action.INCREASE -> actorCount++
+            Action.DECREASE -> actorCount--
+        }
+    }
+}
+
+fun mutexIncrement(by: Int) = CoroutineScope(Dispatchers.Default).async {
+    for (i in 0 until by){
+        mutex.withLock {
+            mutexCounter++
+        }
+    }
+}
+
+fun asyncActorIncrement(by: Int) = CoroutineScope(Dispatchers.Default).async{
+    for (i in 0 until by){
+        actorCounter.send(Action.INCREASE)
+    }
+}
+
+fun asyncActorDecrement(by: Int) = CoroutineScope(Dispatchers.Default).async {
+    for (i in 0 until by){
+        actorCounter.send(Action.DECREASE)
+    }
+}
+
 
 suspend fun createCoroutines(amount: Int){
     val jobs = ArrayList<Job>()
